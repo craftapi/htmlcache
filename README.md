@@ -2,6 +2,8 @@
 
 Generate HTML-file based caching for your Craft CMS
 
+> Please note; this project is in BETA and unfinished. The current download works, but has no cache *control*, meaning the cache will not get refreshed. Use on your own risk.
+
 ## Installation
 
 To install HTML Cache, follow these steps:
