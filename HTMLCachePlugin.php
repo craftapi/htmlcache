@@ -38,23 +38,49 @@ class HTMLCachePlugin extends BasePlugin
 
     public function checkForCacheFile()
     {
+        if (!$this->canCreateCacheFile()) {
+            return;
+        }
+
         $file = $this->getCacheFileName();
         if (file_exists($file)) {
+            // If file is older than 1 hour, delete it
+            if (time() - filemtime($file) >= 3600) {
+                unlink($file);
+                return;
+            }
             $content = file_get_contents($file);
             // Do something with the content
             echo $content;
             craft()->end();
+            return true;
         }
     }
 
     public static function createCacheFile()
     {
-        $content = ob_get_contents();
         $me = new self;
-        $file = $me->getCacheFileName();
-        $fp = fopen($file, 'w+');
-        fwrite($fp, $content);
-        fclose($fp);
+        if ($me->canCreateCacheFile()) {
+            $content = ob_get_contents();
+            $file = $me->getCacheFileName();
+            $fp = fopen($file, 'w+');
+            fwrite($fp, $content);
+            fclose($fp);
+        }
+    }
+
+    private function canCreateCacheFile()
+    {
+        // Skip if we're running in devMode
+        if (craft()->config->get('devMode') === true) {
+            return false;
+        }
+        // Skip if it's a CP Request
+        if (craft()->request->isCpRequest()) {
+            return false;
+        }
+
+        return true;
     }
 
     private function getCacheFileName()
