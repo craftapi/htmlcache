@@ -9,83 +9,27 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
+ * @version   1.0.1
  */
 
 namespace Craft;
 
-class HTMLCachePlugin extends BasePlugin
+class HtmlcachePlugin extends BasePlugin
 {
     /**
-     * Called after the plugin class is instantiated; do any one-time initialization here such as hooks and events:
-     *
-     * craft()->on('entries.saveEntry', function(Event $event) {
-     *    // ...
-     * });
-     *
-     * or loading any third party Composer packages via:
-     *
-     * require_once __DIR__ . '/vendor/autoload.php';
+     * Call the service to check if we already have a cache file; register events
      *
      * @return mixed
      */
     public function init()
     {
-        $this->checkForCacheFile();
+        craft()->htmlcache->checkForCacheFile();
         craft()->attachEventHandler('onEndRequest', function() {
-            HTMLCachePlugin::createCacheFile();
+            craft()->htmlcache->createCacheFile();
         });
-    }
-
-    public function checkForCacheFile()
-    {
-        if (!$this->canCreateCacheFile()) {
-            return;
-        }
-
-        $file = $this->getCacheFileName();
-        if (file_exists($file)) {
-            // If file is older than 1 hour, delete it
-            if (time() - filemtime($file) >= 3600) {
-                unlink($file);
-                return;
-            }
-            $content = file_get_contents($file);
-            // Do something with the content
-            echo $content;
-            craft()->end();
-            return true;
-        }
-    }
-
-    public static function createCacheFile()
-    {
-        $me = new self;
-        if ($me->canCreateCacheFile()) {
-            $content = ob_get_contents();
-            $file = $me->getCacheFileName();
-            $fp = fopen($file, 'w+');
-            fwrite($fp, $content);
-            fclose($fp);
-        }
-    }
-
-    private function canCreateCacheFile()
-    {
-        // Skip if we're running in devMode
-        if (craft()->config->get('devMode') === true) {
-            return false;
-        }
-        // Skip if it's a CP Request
-        if (craft()->request->isCpRequest()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private function getCacheFileName()
-    {
-        return __DIR__ . DIRECTORY_SEPARATOR . '_cached' . DIRECTORY_SEPARATOR . md5($_SERVER['REQUEST_URI']) . '.html';
+        craft()->on('entries.saveEntry', function(Event $event) {
+            craft()->htmlcache->clearCacheFiles();
+        });
     }
 
     /**
@@ -139,7 +83,7 @@ class HTMLCachePlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.0';
+        return '1.0.1';
     }
 
     /**
@@ -182,6 +126,6 @@ class HTMLCachePlugin extends BasePlugin
      */
     public function hasCpSection()
     {
-        return false;
+        return true;
     }
 }
