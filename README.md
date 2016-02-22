@@ -35,8 +35,10 @@ Some things to do, and ideas for potential features:
 
 ## HTML Cache Changelog
 
+### 1.0.1 -- 2016.02.22
+* Moved to services instead of plugin file self
+* 
 ### 1.0.0 -- 2016.02.17
-
 * Initial release
 
 Brought to you by [CraftAPI](https://github.com/craftapi)
