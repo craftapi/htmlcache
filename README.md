@@ -2,8 +2,6 @@
 
 Generate HTML-file based caching for your Craft CMS
 
-> Please note; this project is in BETA and unfinished. The current download works, but has no cache *control*, meaning the cache will not get refreshed. Use on your own risk.
-
 ## Installation
 
 To install HTML Cache, follow these steps:
@@ -17,21 +15,19 @@ HTML Cache works on Craft 2.4.x and Craft 2.5.x.
 
 ## HTML Cache Overview
 
--Insert text here-
+Creates a HTML Cached page for any non-cp GET request for the duration of one hour or untill an entry has been updated. Will not serve a cached request when in DEV-mode
 
 ## Configuring HTML Cache
 
--Insert text here-
+No configuration required
 
 ## Using HTML Cache
 
--Insert text here-
+HTML Cache works automatically
 
 ## HTML Cache Roadmap
 
-Some things to do, and ideas for potential features:
-
-* Release it
+* Settings
 
 ## HTML Cache Changelog
 
