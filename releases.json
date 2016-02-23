@@ -1,5 +1,13 @@
 [
     {
+        "version": "1.0.1",
+        "downloadUrl": "https://github.com/craftapi/htmlcache/archive/master.zip",
+        "date": "2016-02-17T12:29:04.096Z",
+        "notes": [
+            "Moved functionality to services, default cache expires after one hour, disabled for DEV-mode, only caches non-cp GET requests"
+        ]
+    },
+    {
         "version": "1.0.0",
         "downloadUrl": "https://github.com/craftapi/htmlcache/archive/master.zip",
         "date": "2016-02-17T12:29:04.096Z",
