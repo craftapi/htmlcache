@@ -9,12 +9,12 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
- * @version   1.0.1
+ * @version   1.0.2
  */
 
 namespace Craft;
 
-class HtmlcachePlugin extends BasePlugin
+class HTMLCachePlugin extends BasePlugin
 {
     /**
      * Call the service to check if we already have a cache file; register events
