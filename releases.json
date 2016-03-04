@@ -2,7 +2,7 @@
     {
         "version": "1.0.3",
         "downloadUrl": "https://github.com/craftapi/htmlcache/archive/master.zip",
-        "date": "2016-03-03T12:06:04.096Z",
+        "date": "2016-03-04T12:06:04.096Z",
         "notes": [
             "Fixed case-sensitivity bug in HtmlcachePlugin.php and Htmlcache_HtmlcacheService.php, causing an (in)visible error that did not enable the plugin"
         ]
