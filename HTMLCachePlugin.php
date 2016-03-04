@@ -9,12 +9,12 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
- * @version   1.0.2
+ * @version   1.0.3
  */
 
 namespace Craft;
 
-class HTMLCachePlugin extends BasePlugin
+class HtmlcachePlugin extends BasePlugin
 {
     /**
      * Call the service to check if we already have a cache file; register events
@@ -23,13 +23,15 @@ class HTMLCachePlugin extends BasePlugin
      */
     public function init()
     {
-        craft()->htmlcache->checkForCacheFile();
-        craft()->attachEventHandler('onEndRequest', function() {
-            craft()->htmlcache->createCacheFile();
-        });
-        craft()->on('entries.saveEntry', function(Event $event) {
-            craft()->htmlcache->clearCacheFiles();
-        });
+        if ($this->isInstalled && $this->isEnabled) {
+            craft()->htmlcache_htmlcache->checkForCacheFile();
+            craft()->attachEventHandler('onEndRequest', function() {
+                craft()->htmlcache_htmlcache->createCacheFile();
+            });
+            craft()->on('entries.saveEntry', function(Event $event) {
+                craft()->htmlcache_htmlcache->clearCacheFiles();
+            });
+        }
     }
 
     /**
@@ -83,7 +85,7 @@ class HTMLCachePlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.1';
+        return '1.0.3';
     }
 
     /**
@@ -126,6 +128,6 @@ class HTMLCachePlugin extends BasePlugin
      */
     public function hasCpSection()
     {
-        return true;
+        return false;
     }
 }
