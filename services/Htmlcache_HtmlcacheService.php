@@ -9,12 +9,12 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.1
- * @version   1.0.1
+ * @version   1.0.3
  */
 
 namespace Craft;
 
-class HtmlcacheService extends BaseApplicationComponent
+class Htmlcache_HtmlcacheService extends BaseApplicationComponent
 {
     public function checkForCacheFile()
     {
@@ -25,13 +25,34 @@ class HtmlcacheService extends BaseApplicationComponent
         $file = $this->getCacheFileName();
         if (file_exists($file)) {
             // If file is older than 1 hour, delete it
-            if (time() - filemtime($file) >= 3600) {
+            // @todo 1.1: setting based
+            if (time() - ($fmt = filemtime($file)) >= 3600) {
                 unlink($file);
                 return;
             }
             $content = file_get_contents($file);
+
             // Do something with the content
             echo $content;
+
+            // Check the content type
+            $isJson = false;
+            if ($content[0] == '[' || $content[0] == '{') {
+                // JSON?
+                @json_decode($content);
+                if (json_last_error() == JSON_ERROR_NONE) {
+                    $isJson = true;
+                }
+            }
+
+            if ($isJson) {
+                // Add extra JSON headers?
+            }
+            else {
+                // Since it's most likely HTML, display small footprint
+                echo PHP_EOL . '<!-- Cached ' . date('Y-m-d H:i:s', $fmt) . ', printed ' . date('Y-m-d H:i:s') . ' -->';
+            }
+
             return craft()->end();
         }
     }
@@ -40,7 +61,7 @@ class HtmlcacheService extends BaseApplicationComponent
     {
         // Skip if we're running in devMode
         if (craft()->config->get('devMode') === true) {
-            //return false;
+            return false;
         }
         // Skip if it's a CP Request
         if (craft()->request->isCpRequest()) {
@@ -65,8 +86,13 @@ class HtmlcacheService extends BaseApplicationComponent
             $content = ob_get_contents();
             $file = $this->getCacheFileName();
             $fp = fopen($file, 'w+');
-            fwrite($fp, $content);
-            fclose($fp);
+            if ($fp) {
+                fwrite($fp, $content);
+                fclose($fp);
+            }
+            else {
+                self::log('HTML Cache could not write cache file "' . $file . '"');
+            }
         }
     }
     
