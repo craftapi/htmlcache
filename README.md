@@ -33,6 +33,10 @@ HTML Cache works automatically
 
 ## HTML Cache Changelog
 
+### 1.0.3 -- 2016.03.04
+
+* Fixed case-sensitivity bug in HtmlcachePlugin.php and the Htmlcache_HtmlcacheService.php, causing an (in)visible error that did not enable the plugin
+
 ### 1.0.2 -- 2016.03.03
 
 * Fixed case-sensitivity bug in HTMLCachePlugin.php, causing an invisible error that did not enable the plugin
