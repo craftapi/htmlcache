@@ -1,12 +1,20 @@
 [
     {
-        "version": "1.0.3",
+        "version": "1.0.4",
         "downloadUrl": "https://github.com/craftapi/htmlcache/archive/master.zip",
+        "date": "2016-03-07T17:06:04.096Z",
+        "notes": [
+            "Improved functionality with cache duration and hook-before craft"
+        ]
+    }, 
+    {
+        "version": "1.0.3",
+        "downloadUrl": "https://github.com/craftapi/htmlcache/archive/1.0.3.zip",
         "date": "2016-03-04T12:06:04.096Z",
         "notes": [
             "Fixed case-sensitivity bug in HtmlcachePlugin.php and Htmlcache_HtmlcacheService.php, causing an (in)visible error that did not enable the plugin"
         ]
-    },    
+    }, 
     {
         "version": "1.0.2",
         "downloadUrl": "https://github.com/craftapi/htmlcache/archive/1.0.2.zip",
