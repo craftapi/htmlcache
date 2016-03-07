@@ -9,7 +9,7 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
- * @version   1.0.3
+ * @version   1.0.4
  */
 
 namespace Craft;
@@ -23,6 +23,10 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function init()
     {
+        if (!function_exists('\htmlcache_index')) {
+            include_once 'functions/htmlcache.php';
+        }
+
         if ($this->isInstalled && $this->isEnabled) {
             craft()->htmlcache_htmlcache->checkForCacheFile();
             craft()->attachEventHandler('onEndRequest', function() {
@@ -85,7 +89,7 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.3';
+        return '1.0.4';
     }
 
     /**
@@ -129,5 +133,80 @@ class HtmlcachePlugin extends BasePlugin
     public function hasCpSection()
     {
         return false;
+    }
+
+    public function hasSettings()
+    {
+        return true;
+    }
+
+    /**
+     * Returns whether the plugin should get its own tab in the CP header.
+     *
+     * @return bool
+     */
+    protected function defineSettings()
+    {
+        return [
+            'cacheDuration' => [AttributeType::Mixed, 'required' => true, 'default' => 3600],
+            'enableIndex'   => [AttributeType::Bool, 'default' => false, 'required' => true]
+        ];
+    }
+
+    /**
+     * Returns the plugin settings
+     *
+     * @return html
+     */
+    public function getSettingsHtml()
+    {
+        return craft()->templates->render('htmlcache/_settings', ['settings' => $this->getSettings()]);
+    }
+
+    /**
+     * Process the settings and check if the index needs to be altered
+     *
+     * @return function
+     */
+    public function setSettings($values) 
+    {
+        if (!function_exists('\htmlcache_indexEnabled')) {
+            include_once 'functions/htmlcache.php';
+        }
+
+        if (!empty($values['htmlcacheSettingsForm'])) {
+            \htmlcache_indexEnabled($values['enableIndex'] == 1 ? true : false);
+            // Check if it actually worked
+            if (stristr(file_get_contents($_SERVER['SCRIPT_FILENAME']), 'htmlcache') === false) {
+                craft()->userSession->setError(Craft::t('The file ' . $_SERVER['SCRIPT_FILENAME'] . ' could not be edited'));
+                return;
+            }
+            $fp = fopen(__DIR__ . DIRECTORY_SEPARATOR . '_cached' . DIRECTORY_SEPARATOR . 'settings.json', 'w+');
+            if ($fp) {
+                fwrite($fp, json_encode($values));
+                fclose($fp);
+            }
+        }
+        return parent::setSettings($values);
+    }
+    
+    /**
+     * Set the default settings
+     *
+     * @return function
+     */
+    public function onAfterInstall()
+    {
+        craft()->request->redirect(UrlHelper::getCpUrl('/settings/plugins/htmlcache'));
+    }
+
+    /**
+     * Removes the index.php modification if set
+     *
+     * @return bool
+     */
+    public function onAfterUninstall()
+    {
+        //\htmlcache_indexEnabled(false);
     }
 }
