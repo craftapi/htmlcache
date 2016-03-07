@@ -33,6 +33,13 @@ HTML Cache works automatically
 
 ## HTML Cache Changelog
 
+### 1.0.4 -- 2016.03.07
+
+* Moved a few functions to a standalone file
+* Plugin settings including cache duration
+* When enabling the UberCache, the public/index.php file will be altered to include the standalone file
+* This improves the speed from 300-1500ms to about  2-25ms, depending on your server ;)
+
 ### 1.0.3 -- 2016.03.04
 
 * Fixed case-sensitivity bug in HtmlcachePlugin.php and the Htmlcache_HtmlcacheService.php, causing an (in)visible error that did not enable the plugin
