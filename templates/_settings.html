@@ -1,0 +1,40 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.lightswitchField({
+    label:        "Enable HTMLCache?" | t,
+    id:           'enableGeneral',
+    name:         'enableGeneral',
+    instructions: "If the HTMLCache is not enabled, it will not serve cached files" | t,
+    value:        settings.enableGeneral,
+    errors:       settings.getErrors('enableGeneral'),
+    on:           (settings.enableGeneral is defined) ? settings.enableGeneral : ''
+}) }}
+
+{{ forms.lightswitchField({
+    label:        "Enable UberCache by altering index.php?" | t,
+    id:           'enableIndex',
+    name:         'enableIndex',
+    instructions: "This will alter the public/index.php to include htmlcache functions before Craft is loaded. This will improve the speed drastically." | t,
+    value:        settings.enableIndex,
+    errors:       settings.getErrors('enableIndex'),
+    on:           (settings.enableIndex is defined) ? settings.enableIndex : ''
+}) }}
+
+{{ forms.textField({
+    label:        "Default Cache Expiration time" | t,
+    id:           'cacheDuration',
+    name:         'cacheDuration',
+    instructions: "Amount of seconds a Cached Request is valid"|t,
+    value:        settings.cacheDuration,
+    errors:       settings.getErrors('honeypotField')
+}) }}
+
+{{ forms.lightswitchField({
+    label:        "Purge Cache now?" | t,
+    id:           'purgeCache',
+    name:         'purgeCache',
+    instructions: "Purge all current cached files" | t,
+    value:        0
+}) }}
+
+<input type="hidden" name="htmlcacheSettingsForm" value="true">
