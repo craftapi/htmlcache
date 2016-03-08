@@ -1,8 +1,8 @@
 [
     {
-        "version": "1.0.4",
+        "version": "1.0.4.1",
         "downloadUrl": "https://github.com/craftapi/htmlcache/archive/master.zip",
-        "date": "2016-03-07T17:06:04.096Z",
+        "date": "2016-03-08T17:06:04.096Z",
         "notes": [
             "Improved functionality with cache duration and hook-before craft"
         ]
