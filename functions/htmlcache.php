@@ -15,11 +15,11 @@
 if (!function_exists('htmlcache_filename')) {
     function htmlcache_filename($withDirectory = true)
     {
-        $_SERVER['REQUEST_URI'] = strtolower(trim($_SERVER['REQUEST_URI'], '/'));
-        if (empty($_SERVER['REQUEST_URI'])) {
-            $_SERVER['REQUEST_URI'] = 'index';
+        $uri = strtolower(trim($_SERVER['REQUEST_URI'], '/'));
+        if (empty($uri)) {
+            $uri = 'index';
         }
-        $fileName = preg_replace('/__(.+)?/i', '_', preg_replace('/[^a-z0-9]/i', '_', $_SERVER['REQUEST_URI'])) . '.cached.html';
+        $fileName = preg_replace('/__(.+)?/i', '_', preg_replace('/[^a-z0-9]/i', '_', $uri)) . '.cached.html';
         if ($withDirectory) {
             $fileName = htmlcache_directory() . $fileName;
         }
@@ -92,7 +92,11 @@ if (!function_exists('htmlcache_filename')) {
                 echo $content;
 
                 // Since it's most likely HTML, display small footprint
-                echo PHP_EOL . '<!-- Cached ' . ($direct ? 'direct ' : 'later ') . date('Y-m-d H:i:s', $fmt) . ', displayed ' . date('Y-m-d H:i:s') . ' -->';
+                $ms = 0.00000000;
+                if (!empty($_SERVER['REQUEST_TIME_FLOAT'])) {
+                    $ms = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 8);
+                }
+                echo PHP_EOL . '<!-- Cached ' . ($direct ? 'direct ' : 'later ') . date('Y-m-d H:i:s', $fmt) . ', displayed ' . date('Y-m-d H:i:s') . ', generated in ' . $ms . 's -->';
             }
 
             // Exit the response if called directly
@@ -100,5 +104,6 @@ if (!function_exists('htmlcache_filename')) {
                 exit;
             }
         }
+        return true;
     }
 }
