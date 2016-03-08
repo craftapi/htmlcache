@@ -27,6 +27,10 @@ class HtmlcachePlugin extends BasePlugin
             include_once 'functions/htmlcache.php';
         }
 
+        if (!$this->isEnabled) {
+            \htmlcache_indexEnabled(false);
+        }
+
         if ($this->isInstalled && $this->isEnabled) {
             craft()->htmlcache_htmlcache->checkForCacheFile();
             craft()->attachEventHandler('onEndRequest', function() {
@@ -149,7 +153,8 @@ class HtmlcachePlugin extends BasePlugin
     {
         return [
             'cacheDuration' => [AttributeType::Mixed, 'required' => true, 'default' => 3600],
-            'enableIndex'   => [AttributeType::Bool, 'default' => false, 'required' => true]
+            'enableIndex'   => [AttributeType::Bool, 'default' => 0, 'required' => true],
+            'enableGeneral' => [AttributeType::Bool, 'default' => 1, 'required' => true]
         ];
     }
 
@@ -175,17 +180,22 @@ class HtmlcachePlugin extends BasePlugin
         }
 
         if (!empty($values['htmlcacheSettingsForm'])) {
-            \htmlcache_indexEnabled($values['enableIndex'] == 1 ? true : false);
-            // Check if it actually worked
-            if (stristr(file_get_contents($_SERVER['SCRIPT_FILENAME']), 'htmlcache') === false) {
-                craft()->userSession->setError(Craft::t('The file ' . $_SERVER['SCRIPT_FILENAME'] . ' could not be edited'));
-                return;
-            }
+            // Write these settings to a .json file for offline reference
             $fp = fopen(__DIR__ . DIRECTORY_SEPARATOR . '_cached' . DIRECTORY_SEPARATOR . 'settings.json', 'w+');
             if ($fp) {
                 fwrite($fp, json_encode($values));
                 fclose($fp);
             }
+            \htmlcache_indexEnabled($values['enableIndex'] == 1 ? true : false);
+            // Check if it actually worked
+            if (stristr(file_get_contents($_SERVER['SCRIPT_FILENAME']), 'htmlcache') === false && $values['enableIndex'] == 1) {
+                craft()->userSession->setError(Craft::t('The file ' . $_SERVER['SCRIPT_FILENAME'] . ' could not be edited'));
+                return false;
+            }
+        }
+
+        if (!empty($values['purgeCache'])) {
+            craft()->htmlcache_htmlcache->clearCacheFiles();
         }
         return parent::setSettings($values);
     }
@@ -205,8 +215,9 @@ class HtmlcachePlugin extends BasePlugin
      *
      * @return bool
      */
-    public function onAfterUninstall()
+    public function onBeforeUninstall()
     {
-        //\htmlcache_indexEnabled(false);
+        // Make sure to delete any reference in the public/index.php file
+        \htmlcache_indexEnabled(false);
     }
 }
