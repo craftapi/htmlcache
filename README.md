@@ -13,25 +13,30 @@ To install HTML Cache, follow these steps:
 3. Install plugin in the Craft Control Panel under Settings > Plugins
 4. The plugin folder should be named `htmlcache` for Craft to see it.  GitHub recently started appending `-master` (the branch name) to the name of the folder for zip file downloads.
 
-HTML Cache works on Craft 2.4.x and Craft 2.5.x.
+HTML Cache works on Craft 2.4.x and Craft 2.5.x, both PHP 5.6 and 7.0
 
 ## HTML Cache Overview
 
-Creates a HTML Cached page for any non-cp GET request for the duration of one hour or untill an entry has been updated. Will not serve a cached request when in DEV-mode
+Creates a HTML Cached page for any non-cp GET request for the duration of one hour (configurable) or untill an entry has been updated. Will not serve a cached request when in DEV-mode
 
 ## Configuring HTML Cache
 
-No configuration required
+After installing HTML Cache, you'll be redirected to the settings page.
 
 ## Using HTML Cache
 
-HTML Cache works automatically
+HTML Cache has a settings page where you can enable/disable both normal and ubercache. The ubercache alters the public/index.php file to include extra functionality before Craft gets initialised, eliminating the TTFB caused by Yii. 
 
 ## HTML Cache Roadmap
 
-* Settings
+* Fix cached CSRF-requests
+* CP Widget with amount of cache files and size, plus a button to purge the cache directly
 
 ## HTML Cache Changelog
+
+### 1.0.4-2 -- 2016.03.08
+
+* Bugfix
 
 ### 1.0.4 -- 2016.03.07
 
