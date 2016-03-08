@@ -1,8 +1,12 @@
 # HTML Cache plugin for Craft CMS
 
-Generate HTML-file based caching for your Craft CMS
+This Craft plugin will generate static HTML files for your website. No need for Reddis/Varnish setups anymore! 
 
-> Currently in BETA, requesting feedback regarding speed improvements (cached request vs non-cached request) and other requirements
+* Improves the speed drastically: 300-1500MS to 2-50MS (depending on server setup) if *ubercache* is enabled from the settings page
+* Busts the cache automatically when an entry has been updated
+* Cache duration time can be set; defaults to 3600 seconds (1 hour)
+
+> This plugin is still in *beta*, so please test if this plugin works as expected on a *development* environment _before_ pushing to a production site.
 
 ## Installation
 
@@ -31,6 +35,8 @@ HTML Cache has a settings page where you can enable/disable both normal and uber
 
 * Fix cached CSRF-requests
 * CP Widget with amount of cache files and size, plus a button to purge the cache directly
+* Move files inside _cached directory to storage/runtime directory as those permissions should work at all times
+* 1.1: Improve cache busting by checking the impact of an updated entry; do we really need to bust everything?
 
 ## HTML Cache Changelog
 
