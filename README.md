@@ -12,8 +12,8 @@ This Craft plugin will generate static HTML files for your website. No need for 
 
 Brought to you by [CraftAPI](https://github.com/craftapi)
 
-## HTMLCache is Beerware
-I've decided to keep this project Open Source/Beerware and to not publish it as a "premium" plugin. If you like the project/find it usefull and you have a few bucks to spare, you're welcome to donate a beer through Pledgie! 
+## :beers: HTMLCache is Beerware
+I've decided to keep this project Open Source/Beerware and to not publish it as a "premium" plugin. If you like the project/find it usefull and you have a few bucks to spare, you're welcome to donate a beer :beer: through Pledgie! 
 
 <a href='https://pledgie.com/campaigns/31263?utm_source=github-craftapi-htmlcache'><img alt='Click here to lend your support to: Craft HTMLCache donations and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/31263.png?skin_name=chrome' border='0' ></a>
 
