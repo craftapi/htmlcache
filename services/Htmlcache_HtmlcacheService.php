@@ -87,4 +87,10 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     {
         return \htmlcache_directory();
     }
+    
+    public function log($settings, $errors, $level)
+    {
+        // Firstly, store in plugin log file (use $level to control log level)
+        HtmlcachePlugin::log(print_r($errors, true), $level, true);
+    }
 }
