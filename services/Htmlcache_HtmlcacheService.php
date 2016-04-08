@@ -9,7 +9,7 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.1
- * @version   1.0.4
+ * @version   1.0.5
  */
 
 namespace Craft;
@@ -33,7 +33,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     public function canCreateCacheFile()
     {
         // Skip if we're running in devMode
-        if (craft()->config->get('devMode') === true) {
+        if (craft()->config->get('devMode') === true || defined('NOHTMLCACHE')) {
             return false;
         }
         // Skip if it's a CP Request
@@ -49,7 +49,6 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         if (!craft()->request->isGetRequest()) {
             return false;
         }
-
         return true;
     }
     
@@ -62,9 +61,6 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
             if ($fp) {
                 fwrite($fp, $content);
                 fclose($fp);
-            }
-            else {
-                self::log('HTML Cache could not write cache file "' . $file . '"');
             }
         }
     }
