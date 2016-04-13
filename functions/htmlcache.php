@@ -29,10 +29,10 @@ if (!function_exists('htmlcache_filename')) {
     function htmlcache_directory()
     {
         if (function_exists('craft')) {
-            return craft()->path->getTempPath() . DIRECTORY_SEPARATOR . '_cached.';
+            return craft()->path->getTempPath() . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . '_cached.';
         }
         // Fallback to default directory
-        return dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . '_cached.';
+        return dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . '_cached.';
     }
 
     function htmlcache_indexEnabled($enabled = true)
