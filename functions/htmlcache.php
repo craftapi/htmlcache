@@ -9,13 +9,13 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.4
- * @version   1.0.4
+ * @version   1.0.5
  */
 
 if (!function_exists('htmlcache_filename')) {
     function htmlcache_filename($withDirectory = true)
     {
-        $uri = strtolower(trim($_SERVER['REQUEST_URI'], '/'));
+        $uri = strtolower($_SERVER['HTTP_HOST'] . trim($_SERVER['REQUEST_URI'], '/') . $_SERVER['QUERY_STRING']);
         if (empty($uri)) {
             $uri = 'index';
         }
@@ -28,12 +28,16 @@ if (!function_exists('htmlcache_filename')) {
 
     function htmlcache_directory()
     {
-        return dirname(__DIR__) . DIRECTORY_SEPARATOR . '_cached' . DIRECTORY_SEPARATOR;
+        if (function_exists('craft')) {
+            return craft()->path->getTempPath() . DIRECTORY_SEPARATOR . '_cached.';
+        }
+        // Fallback to default directory
+        return dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . '_cached.';
     }
 
     function htmlcache_indexEnabled($enabled = true)
     {
-        $replaceWith = '/*HTMLCache Begin*/require_once str_replace(\'index.php\', \'../plugins\' . DIRECTORY_SEPARATOR . \'htmlcache\' . DIRECTORY_SEPARATOR . \'functions\' . DIRECTORY_SEPARATOR . \'htmlcache.php\', $path);htmlcache_checkCache();/*HTMLCache End*/';
+        $replaceWith = '/*HTMLCache Begin*/if (defined(\'CRAFT_PLUGINS_PATH\')) {require_once CRAFT_PLUGINS_PATH . DIRECTORY_SEPARATOR . \'htmlcache\' . DIRECTORY_SEPARATOR . \'functions\' . DIRECTORY_SEPARATOR . \'htmlcache.php\';} else {require_once str_replace(\'index.php\', \'../plugins\' . DIRECTORY_SEPARATOR . \'htmlcache\' . DIRECTORY_SEPARATOR . \'functions\' . DIRECTORY_SEPARATOR . \'htmlcache.php\', $path);}htmlcache_checkCache();/*HTMLCache End*/';
         $replaceFrom = 'require_once $path;';
         $file = $_SERVER['SCRIPT_FILENAME'];
         $contents = file_get_contents($file);
@@ -50,6 +54,9 @@ if (!function_exists('htmlcache_filename')) {
 
     function htmlcache_checkCache($direct = true)
     {
+        if (defined('NOHTMLCACHE')) {
+            return false;
+        }
         $file = htmlcache_filename(true);
         if (file_exists($file)) {
             if (file_exists($settingsFile = htmlcache_directory() . 'settings.json')) {
