@@ -9,7 +9,7 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
- * @version   1.0.4
+ * @version   1.0.5
  */
 
 namespace Craft;
@@ -93,7 +93,7 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.4.1';
+        return '1.0.5';
     }
 
     /**
@@ -152,9 +152,21 @@ class HtmlcachePlugin extends BasePlugin
     protected function defineSettings()
     {
         return [
-            'cacheDuration' => [AttributeType::Mixed, 'required' => true, 'default' => 3600],
-            'enableIndex'   => [AttributeType::Bool, 'default' => 0, 'required' => true],
-            'enableGeneral' => [AttributeType::Bool, 'default' => 1, 'required' => true]
+            'cacheDurationIndex'    => [AttributeType::Mixed, 
+                                        'required'  => true, 
+                                        'default'   => 3600],
+            'cacheDurationBlock'    => [AttributeType::Mixed, 
+                                        'required'  => true, 
+                                        'default'   => 3600],
+            'enableIndex'           => [AttributeType::Bool, 
+                                        'default'   => 0, 
+                                        'required'  => true],
+            'enableGeneral'         => [AttributeType::Bool, 
+                                        'default'   => 1, 
+                                        'required'  => true],
+            'enableBlocksOnDev'     => [AttributeType::Bool, 
+                                        'default'   => 0, 
+                                        'required'  => true]
         ];
     }
 
@@ -181,7 +193,7 @@ class HtmlcachePlugin extends BasePlugin
 
         if (!empty($values['htmlcacheSettingsForm'])) {
             // Write these settings to a .json file for offline reference
-            $fp = fopen(__DIR__ . DIRECTORY_SEPARATOR . '_cached' . DIRECTORY_SEPARATOR . 'settings.json', 'w+');
+            $fp = fopen(htmlcache_directory() . 'settings.json', 'w+');
             if ($fp) {
                 fwrite($fp, json_encode($values));
                 fclose($fp);
@@ -219,5 +231,15 @@ class HtmlcachePlugin extends BasePlugin
     {
         // Make sure to delete any reference in the public/index.php file
         \htmlcache_indexEnabled(false);
+    }
+
+    public function addTwigExtension()
+    {
+        Craft::import('plugins.htmlcache.twigextensions.HtmlcacheTwigExtension');
+        Craft::import('plugins.htmlcache.twigextensions.HtmlcacheTwigTokenParser');
+        Craft::import('plugins.htmlcache.twigextensions.HtmlcacheTwigNode');
+        Craft::import('plugins.htmlcache.twigextensions.NohtmlcacheTwigTokenParser');
+        Craft::import('plugins.htmlcache.twigextensions.NohtmlcacheTwigNode');
+        return new HtmlcacheTwigExtension;
     }
 }
