@@ -33,7 +33,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     public function canCreateCacheFile()
     {
         // Skip if we're running in devMode
-        if (craft()->config->get('devMode') === true || defined('NOHTMLCACHE')) {
+        if (craft()->config->get('devMode') === true || defined('NOHTMLCACHE') || isset($_SERVER['NOHTMLCACHE'])) {
             return false;
         }
         // Skip if it's a CP Request
@@ -51,18 +51,56 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         }
         return true;
     }
+
+    public function canCreateCacheBlock()
+    {
+        // When in development mode
+        if (craft()->config->get('devMode') === true) {
+            // Make sure we check if it's allowed
+            return (int)!\htmlcache_getSettings()->enableBlocksOnDev;
+        }
+
+        // Skip if it's a live preview
+        if (craft()->request->isLivePreview()) {
+            return false;
+        }
+
+        return true;
+    }
     
     public function createCacheFile()
     {
         if ($this->canCreateCacheFile()) {
             $content = ob_get_contents();
-            $file = $this->getCacheFileName();
-            $fp = fopen($file, 'w+');
-            if ($fp) {
-                fwrite($fp, $content);
-                fclose($fp);
+            if (!empty($content)) {
+                $file = $this->getCacheFileName();
+                $fp = fopen($file, 'w+');
+                if ($fp) {
+                    fwrite($fp, $content);
+                    fclose($fp);
+                }
             }
         }
+    }
+
+    public function getCacheBlock($key, $global = false)
+    {
+        $file = $this->getCacheFileDirectory() . $key . '.cached.html';
+        if (file_exists($file)) {
+            return file_get_contents($file);
+        }
+        return null;
+    }
+
+    public function setCacheBlock($key, $global = false, $duration = null, $expiration = null, $content = null)
+    {
+        $file = $this->getCacheFileDirectory() . $key . '.cached.html';
+        $fp = fopen($file, 'w+');
+        if ($fp) {
+            fwrite($fp, $content);
+            fclose($fp);
+        }
+        return true;
     }
     
     public function clearCacheFiles()
