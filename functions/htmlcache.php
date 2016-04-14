@@ -57,19 +57,22 @@ if (!function_exists('htmlcache_filename')) {
         if (defined('NOHTMLCACHE')) {
             return false;
         }
+        if (isset($_SERVER['NOHTMLCACHE'])) {
+            return false;
+        }
+        //echo '-not-defined-nohtmlcache-';
         $file = htmlcache_filename(true);
         if (file_exists($file)) {
-            if (file_exists($settingsFile = htmlcache_directory() . 'settings.json')) {
-                $settings = json_decode(file_get_contents($settingsFile), true);
-            }
-            else {
-                $settings = ['cacheDuration' => 3600];
-            }
-            if (time() - ($fmt = filemtime($file)) >= $settings['cacheDuration']) {
+            $settings = htmlcache_getSettings();
+            if (time() - ($fmt = filemtime($file)) >= $settings->cacheDurationIndex) {
                 unlink($file);
                 return;
             }
             $content = file_get_contents($file);
+            if (empty($content)) {
+                unlink($file);
+                return false;
+            }
 
             // Do something with the content?
             //echo $content;
@@ -97,13 +100,6 @@ if (!function_exists('htmlcache_filename')) {
                 }
                 // Output the content
                 echo $content;
-
-                // Since it's most likely HTML, display small footprint
-                $ms = 0.00000000;
-                if (!empty($_SERVER['REQUEST_TIME_FLOAT'])) {
-                    $ms = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 8);
-                }
-                echo PHP_EOL . '<!-- Cached ' . ($direct ? 'direct ' : 'later ') . date('Y-m-d H:i:s', $fmt) . ', displayed ' . date('Y-m-d H:i:s') . ', generated in ' . $ms . 's -->';
             }
 
             // Exit the response if called directly
@@ -112,5 +108,25 @@ if (!function_exists('htmlcache_filename')) {
             }
         }
         return true;
+    }
+
+    function htmlcache_getSettings() 
+    {
+        if (file_exists($settingsFile = htmlcache_directory() . 'settings.json')) {
+            $settings = json_decode(file_get_contents($settingsFile));
+        }
+        else if (function_exists('craft')) {
+            $settings = json_decode(json_encode(craft()->plugins->getPlugin('htmlcache')->getSettings()));
+        }
+        else {
+            $settings = json_decode('{
+                "cacheDurationIndex": 3600,
+                "cacheDurationBlock": 3600,
+                "enableIndex":0,
+                "enableGeneral":1,
+                "enableBlocksOnDev":0
+            }');
+        }
+        return $settings;
     }
 }
