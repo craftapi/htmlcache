@@ -1,3 +1,5 @@
+# DEVELOPMENT BRANCHE - UNSTABLE
+
 # HTML Cache plugin for Craft CMS
 
 This Craft plugin will generate static HTML files for your website. No need for Reddis/Varnish setups anymore! 
