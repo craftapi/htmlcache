@@ -11,6 +11,16 @@
 }) }}
 
 {{ forms.lightswitchField({
+    label:        "Enable HTMLCache Blocks while in DevMode?" | t,
+    id:           'enableBlocksOnDev',
+    name:         'enableBlocksOnDev',
+    instructions: "If the HTMLCache is not enabled, it will not serve cached files" | t,
+    value:        settings.enableBlocksOnDev,
+    errors:       settings.getErrors('enableBlocksOnDev'),
+    on:           (settings.enableBlocksOnDev is defined) ? settings.enableBlocksOnDev : ''
+}) }}
+
+{{ forms.lightswitchField({
     label:        "Enable UberCache by altering index.php?" | t,
     id:           'enableIndex',
     name:         'enableIndex',
@@ -21,11 +31,20 @@
 }) }}
 
 {{ forms.textField({
-    label:        "Default Cache Expiration time" | t,
-    id:           'cacheDuration',
-    name:         'cacheDuration',
+    label:        "UberCache Expiration time" | t,
+    id:           'cacheDurationIndex',
+    name:         'cacheDurationIndex',
     instructions: "Amount of seconds a Cached Request is valid"|t,
-    value:        settings.cacheDuration,
+    value:        settings.cacheDurationIndex,
+    errors:       settings.getErrors('honeypotField')
+}) }}
+
+{{ forms.textField({
+    label:        "Cache Block Expiration time" | t,
+    id:           'cacheDurationIndex',
+    name:         'cacheDurationIndex',
+    instructions: "Amount of seconds a Cached Request is valid"|t,
+    value:        settings.cacheDurationBlock,
     errors:       settings.getErrors('honeypotField')
 }) }}
 
