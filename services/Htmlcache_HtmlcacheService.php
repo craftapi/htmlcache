@@ -28,6 +28,10 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
 
             return craft()->end();
         }
+        // Turn output buffering on
+        else {
+            ob_start();
+        }
     }
     
     public function canCreateCacheFile()
@@ -57,6 +61,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     {
         if ($this->canCreateCacheFile()) {
             $content = ob_get_contents();
+            ob_end_flush();
             $file = $this->getCacheFileName();
             $fp = fopen($file, 'w+');
             if ($fp) {
