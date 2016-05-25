@@ -40,6 +40,10 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         if (craft()->config->get('devMode') === true) {
             return false;
         }
+        // Skip if system is not on
+        if (!craft()->isSystemOn()) {
+            return false;
+        }
         // Skip if it's a CP Request
         if (craft()->request->isCpRequest()) {
             return false;
