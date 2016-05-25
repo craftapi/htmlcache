@@ -44,7 +44,16 @@ if (!function_exists('htmlcache_filename')) {
             }
         }
         else {
-            file_put_contents($file, str_replace($replaceWith, '', $contents));
+            $beginning = '/*HTMLCache Begin*/';
+	    $end = '/*HTMLCache End*/';
+
+	    $beginningPos = strpos($contents, $beginning);
+	    $endPos = strpos($contents, $end);
+	    
+	    if ($beginningPos !== false && $endPos !== false) {
+	    	$textToDelete = substr($contents, $beginningPos, ($endPos + strlen($end)) - $beginningPos);
+	    	file_put_contents($file, str_replace($textToDelete, '', $contents));
+	    }
         }
     }
 
