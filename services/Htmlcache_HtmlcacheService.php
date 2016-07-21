@@ -48,6 +48,12 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         if (craft()->request->isCpRequest()) {
             return false;
         }
+
+        // Skip if it's an action Request
+        if (craft()->request->isActionRequest()) {
+            return false;
+        }
+
         // Skip if it's a preview request
         if (craft()->request->isLivePreview()) {
             return false;
