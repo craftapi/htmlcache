@@ -28,7 +28,7 @@ if (!function_exists('htmlcache_filename')) {
         $uri = $_SERVER['REQUEST_URI'];
         $extArray = explode('.', $uri);
         $ext = 'html';
-        if (in_array(['css', 'js', 'jpg', 'jpeg', 'gif', 'bmp', 'png'], end($extArray))) {
+        if (is_array($extArray) && count($extArray) && in_array(end($extArray), ['css', 'js', 'jpg', 'jpeg', 'gif', 'bmp', 'png'])) {
             $ext = end($extArray);
         }
 
