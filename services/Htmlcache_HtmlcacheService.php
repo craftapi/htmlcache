@@ -79,7 +79,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
                 fclose($fp);
             }
             else {
-                self::log('HTML Cache could not write cache file "' . $file . '"');
+                //self::log('HTML Cache could not write cache file "' . $file . '"');
             }
         }
     }
@@ -106,6 +106,6 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     public function log($settings, $errors, $level)
     {
         // Firstly, store in plugin log file (use $level to control log level)
-        HtmlcachePlugin::log(print_r($errors, true), $level, true);
+        //HtmlcachePlugin::log(print_r($errors, true), $level, true);
     }
 }
