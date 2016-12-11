@@ -26,8 +26,13 @@ if (!function_exists('htmlcache_filename')) {
         }
 
         $uri = $_SERVER['REQUEST_URI'];
+        $extArray = explode('.', $uri);
+        $ext = 'html';
+        if (in_array(['css', 'js', 'jpg', 'jpeg', 'gif', 'bmp', 'png'], end($extArray))) {
+            $ext = end($extArray);
+        }
 
-        $fileName = md5($protocol . $host . $uri) . '.html';
+        $fileName = md5($protocol . $host . $uri) . '.' . $ext;
         if ($withDirectory) {
             $fileName = htmlcache_directory() . $fileName;
         }
@@ -46,7 +51,7 @@ if (!function_exists('htmlcache_filename')) {
     function htmlcache_indexEnabled($enabled = true)
     {
         $replaceWith = '/*HTMLCache Begin*/if (defined(\'CRAFT_PLUGINS_PATH\')) {require_once CRAFT_PLUGINS_PATH . DIRECTORY_SEPARATOR . \'htmlcache\' . DIRECTORY_SEPARATOR . \'functions\' . DIRECTORY_SEPARATOR . \'htmlcache.php\';} else {require_once str_replace(\'index.php\', \'../plugins\' . DIRECTORY_SEPARATOR . \'htmlcache\' . DIRECTORY_SEPARATOR . \'functions\' . DIRECTORY_SEPARATOR . \'htmlcache.php\', $path);}htmlcache_checkCache();/*HTMLCache End*/';
-	$replaceFrom = 'require_once $path;';
+        $replaceFrom = 'require_once $path;';
         $file = $_SERVER['SCRIPT_FILENAME'];
         $contents = file_get_contents($file);
 
@@ -57,15 +62,15 @@ if (!function_exists('htmlcache_filename')) {
         }
         else {
             $beginning = '/*HTMLCache Begin*/';
-	    $end = '/*HTMLCache End*/';
+	        $end = '/*HTMLCache End*/';
 
-	    $beginningPos = strpos($contents, $beginning);
-	    $endPos = strpos($contents, $end);
+	        $beginningPos = strpos($contents, $beginning);
+	        $endPos = strpos($contents, $end);
 	    
-	    if ($beginningPos !== false && $endPos !== false) {
-	    	$textToDelete = substr($contents, $beginningPos, ($endPos + strlen($end)) - $beginningPos);
-	    	file_put_contents($file, str_replace($textToDelete, '', $contents));
-	    }
+	        if ($beginningPos !== false && $endPos !== false) {
+	    	    $textToDelete = substr($contents, $beginningPos, ($endPos + strlen($end)) - $beginningPos);
+	    	    file_put_contents($file, str_replace($textToDelete, '', $contents));
+	        }
         }
     }
 
@@ -107,7 +112,23 @@ if (!function_exists('htmlcache_filename')) {
             }
             else {
                 if ($direct) {
-                    header('Content-type:text/html;charset=UTF-8');
+                    $fileExt = explode('.', $file);
+                    $fileExt = end($fileExt);
+                    switch (end($fileExt)) {
+                        case 'css':
+                        case 'js':
+                            $content = 'text/' . $fileExt . ';charset=UTF-8';
+                            break;
+                            
+                        case 'jpg':
+                        case 'jpeg':
+                        case 'bmp':
+                        case 'gif':
+                        case 'png':
+                            $content = 'image/' . $fileExt;
+                            break;
+                    }
+                    header('Content-type:' . $content);
                 }
                 // Output the content
                 echo $content;
