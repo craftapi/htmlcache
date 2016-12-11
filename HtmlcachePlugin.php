@@ -217,6 +217,9 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function onBeforeUninstall()
     {
+        if (!function_exists('\htmlcache_indexEnabled')) {
+            include_once 'functions/htmlcache.php';
+        }
         // Make sure to delete any reference in the public/index.php file
         \htmlcache_indexEnabled(false);
     }
