@@ -22,6 +22,9 @@ if (!function_exists('htmlcache_filename')) {
         if (empty($_SERVER['HTTP_HOST']) && !empty($_SERVER['SERVER_NAME'])) {
             $_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'];
         }
+        if (empty($_SERVER['REQUEST_SCHEME'])) {
+            $_SERVER['REQUEST_SCHEME'] = 'http';
+        }
         $fileName = md5($_SERVER['REQUEST_SCHEME'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) . '.cached.html';
         if ($withDirectory) {
             $fileName = htmlcache_directory() . $fileName;
