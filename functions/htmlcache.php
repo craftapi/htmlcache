@@ -15,14 +15,19 @@
 if (!function_exists('htmlcache_filename')) {
     function htmlcache_filename($withDirectory = true)
     {
-        $uri = strtolower(trim($_SERVER['REQUEST_URI'], '/'));
-        if (empty($uri)) {
-            $uri = 'index';
+        $protocol = 'http://';
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+            $protocol = 'https://';
         }
-        if (empty($_SERVER['HTTP_HOST']) && !empty($_SERVER['SERVER_NAME'])) {
-            $_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'];
+
+        $host = $_SERVER['HTTP_HOST'];
+        if (empty($host) && !empty($_SERVER['SERVER_NAME'])) {
+            $host = $_SERVER['SERVER_NAME'];
         }
-        $fileName = md5($_SERVER['REQUEST_SCHEME'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) . '.cached.html';
+
+        $uri = $_SERVER['REQUEST_URI'];
+
+        $fileName = md5($protocol . $host . $uri) . '.html';
         if ($withDirectory) {
             $fileName = htmlcache_directory() . $fileName;
         }
