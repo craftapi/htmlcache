@@ -19,7 +19,7 @@ if (!function_exists('htmlcache_filename')) {
      *
      * Note: if you use nginx and you're forwarding to 
      * php-fpm/nginx/apache, note that that `HTTP_HOST` overrides `SERVER_NAME`
-     
+     *
      * @todo: v1.1 implement safe-to-cache URL-queries to make more generic fp-cache
      *
      * @param $withDirectory bool Return 
@@ -79,11 +79,11 @@ if (!function_exists('htmlcache_filename')) {
 
     function htmlcache_directory()
     {
-        if (function_exists('craft')) {
-            return craft()->path->getTempPath() . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . '_cached.';
+        if (defined('CRAFT_STORAGE_PATH')) {
+            return CRAFT_STORAGE_PATH . 'runtime' . DIRECTORY_SEPARATOR . 'htmlcache' . DIRECTORY_SEPARATOR;
         }
         // Fallback to default directory
-        return dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . '_cached.';
+        return dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'htmlcache' . DIRECTORY_SEPARATOR;
     }
 
     function htmlcache_indexEnabled($enabled = true)
@@ -97,18 +97,17 @@ if (!function_exists('htmlcache_filename')) {
             if (stristr($contents, 'htmlcache') === false) {
                 file_put_contents($file, str_replace($replaceFrom, $replaceWith . $replaceFrom, $contents));
             }
-        }
-        else {
+        } else {
             $beginning = '/*HTMLCache Begin*/';
-	        $end = '/*HTMLCache End*/';
+            $end = '/*HTMLCache End*/';
 
-	        $beginningPos = strpos($contents, $beginning);
-	        $endPos = strpos($contents, $end);
-	    
-	        if ($beginningPos !== false && $endPos !== false) {
-	    	    $textToDelete = substr($contents, $beginningPos, ($endPos + strlen($end)) - $beginningPos);
-	    	    file_put_contents($file, str_replace($textToDelete, '', $contents));
-	        }
+            $beginningPos = strpos($contents, $beginning);
+            $endPos = strpos($contents, $end);
+
+            if ($beginningPos !== false && $endPos !== false) {
+                $textToDelete = substr($contents, $beginningPos, ($endPos + strlen($end)) - $beginningPos);
+                file_put_contents($file, str_replace($textToDelete, '', $contents));
+            }
         }
     }
 
@@ -118,13 +117,12 @@ if (!function_exists('htmlcache_filename')) {
         if (file_exists($file)) {
             if (file_exists($settingsFile = htmlcache_directory() . 'settings.json')) {
                 $settings = json_decode(file_get_contents($settingsFile), true);
-            }
-            else {
+            } else {
                 $settings = ['cacheDuration' => 3600];
             }
             if (time() - ($fmt = filemtime($file)) >= $settings['cacheDuration']) {
                 unlink($file);
-                return;
+                return false;
             }
             $content = file_get_contents($file);
 
@@ -144,8 +142,7 @@ if (!function_exists('htmlcache_filename')) {
                     header('Content-type:application/json');
                 }
                 echo $content;
-            }
-            else {
+            } else {
                 if ($direct) {
                     // patch for #30
                     $fileExt = explode('.', $file);
@@ -197,8 +194,6 @@ if (!function_exists('htmlcache_filename')) {
                     }
                     echo PHP_EOL . '<!-- Cached ' . ($direct ? 'direct ' : 'later ') . date('Y-m-d H:i:s', $fmt) . ', displayed ' . date('Y-m-d H:i:s') . ', generated in ' . $ms . 's -->';
                 }
-                
-                // end patch 30
             }
 
             // Exit the response if called directly
