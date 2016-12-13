@@ -33,10 +33,10 @@ class HtmlcachePlugin extends BasePlugin
 
         if ($this->isInstalled && $this->isEnabled) {
             craft()->htmlcache_htmlcache->checkForCacheFile();
-            craft()->attachEventHandler('onEndRequest', function() {
+            craft()->attachEventHandler('onEndRequest', function () {
                 craft()->htmlcache_htmlcache->createCacheFile();
             });
-            craft()->on('entries.saveEntry', function(Event $event) {
+            craft()->on('entries.saveEntry', function (Event $event) {
                 craft()->htmlcache_htmlcache->clearCacheFiles();
             });
         }
@@ -49,7 +49,7 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function getName()
     {
-         return Craft::t('HTML Cache');
+        return Craft::t('HTML Cache');
     }
 
     /**
@@ -153,7 +153,7 @@ class HtmlcachePlugin extends BasePlugin
     {
         return [
             'cacheDuration' => [AttributeType::Mixed, 'required' => true, 'default' => 3600],
-            'enableIndex'   => [AttributeType::Bool, 'default' => 0, 'required' => true],
+            'enableIndex' => [AttributeType::Bool, 'default' => 0, 'required' => true],
             'enableGeneral' => [AttributeType::Bool, 'default' => 1, 'required' => true]
         ];
     }
@@ -173,7 +173,7 @@ class HtmlcachePlugin extends BasePlugin
      *
      * @return function
      */
-    public function setSettings($values) 
+    public function setSettings($values)
     {
         if (!function_exists('\htmlcache_indexEnabled')) {
             include_once 'functions/htmlcache.php';
@@ -181,7 +181,9 @@ class HtmlcachePlugin extends BasePlugin
 
         if (!empty($values['htmlcacheSettingsForm'])) {
             // Write these settings to a .json file for offline reference
-            $fp = fopen(__DIR__ . DIRECTORY_SEPARATOR . '_cached' . DIRECTORY_SEPARATOR . 'settings.json', 'w+');
+            $path = craft()->path->getStoragePath() . 'runtime' . DIRECTORY_SEPARATOR . 'htmlcache' . DIRECTORY_SEPARATOR;
+            IOHelper::ensureFolderExists($path);
+            $fp = fopen($path . 'settings.json', 'w+');
             if ($fp) {
                 fwrite($fp, json_encode($values));
                 fclose($fp);
@@ -199,7 +201,7 @@ class HtmlcachePlugin extends BasePlugin
         }
         return parent::setSettings($values);
     }
-    
+
     /**
      * Set the default settings
      *
