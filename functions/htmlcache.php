@@ -13,29 +13,67 @@
  */
 
 if (!function_exists('htmlcache_filename')) {
+    
+    /**
+     * Returns unique identifier based on the current requested domain and path
+     *
+     * Note: if you use nginx and you're forwarding to 
+     * php-fpm/nginx/apache, note that that `HTTP_HOST` overrides `SERVER_NAME`
+     
+     * @todo: v1.1 implement safe-to-cache URL-queries to make more generic fp-cache
+     *
+     * @param $withDirectory bool Return 
+     * @returns $fileName string MD5 hash
+     */
     function htmlcache_filename($withDirectory = true)
     {
-        $protocol = 'http://';
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
-            $protocol = 'https://';
+        $pieces = [];
+        $pieces['protocol'] = 'http://';
+        if (
+            isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' 
+            || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'
+        ) {
+            $pieces['protocol'] = 'https://';
+        }
+        
+        $pieces['host'] = 'localhost';
+        if (!empty($_SERVER['SERVER_NAME'])) {
+            $pieces['host'] = $_SERVER['SERVER_NAME'];
+        }
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            $pieces['host'] = $_SERVER['HTTP_HOST'];
+        }
+        if (!empty($_SERVER['HTTP_PORT'])) {
+            $pieces['host'] .= $_SERVER['HTTP_PORT'];
+        }
+	
+        $pieces['uri'] = '';
+        if (!empty($_SERVER['REQUEST_URI'])) {
+		    $pieces['uri'] = $_SERVER['REQUEST_URI'];
+        }
+        
+        $extArray = array_merge([], explode('.', $pieces['uri']));
+        $pieces['ext'] = 'html';
+        if (
+            is_array($extArray) 
+            && count($extArray) 
+            && in_array(
+                end($extArray), 
+                [
+                    'css', 'js', 
+                    'jpg', 'jpeg', 'gif', 'bmp', 'png'
+                ]
+            )
+        ) {
+            $pieces['ext'] = end($extArray);
         }
 
-        $host = $_SERVER['HTTP_HOST'];
-        if (empty($host) && !empty($_SERVER['SERVER_NAME'])) {
-            $host = $_SERVER['SERVER_NAME'];
-        }
-
-        $uri = $_SERVER['REQUEST_URI'];
-        $extArray = explode('.', $uri);
-        $ext = 'html';
-        if (is_array($extArray) && count($extArray) && in_array(end($extArray), ['css', 'js', 'jpg', 'jpeg', 'gif', 'bmp', 'png'])) {
-            $ext = end($extArray);
-        }
-
-        $fileName = md5($protocol . $host . $uri) . '.' . $ext;
+        $fileName = md5(implode('', $pieces)) . '.' . $pieces['ext'];
+        
         if ($withDirectory) {
             $fileName = htmlcache_directory() . $fileName;
         }
+        
         return $fileName;
     }
 
@@ -90,9 +128,6 @@ if (!function_exists('htmlcache_filename')) {
             }
             $content = file_get_contents($file);
 
-            // Do something with the content?
-            //echo $content;
-
             // Check the content type
             $isJson = false;
             if ($content[0] == '[' || $content[0] == '{') {
@@ -112,12 +147,18 @@ if (!function_exists('htmlcache_filename')) {
             }
             else {
                 if ($direct) {
+                    // patch for #30
                     $fileExt = explode('.', $file);
                     $fileExt = end($fileExt);
-                    switch (end($fileExt)) {
+                    // @todo v1.1 implement config.defaultMimetype
+                    $contentType = 'text/html';//craft()->config->get('defaultMimetype', 'text/html');
+                    // @todo v1.1 implement config.defaultMimetypeCharset
+                    $contentCharset = 'UTF-8';//craft()->config->get('defaultMimetypeCharset', 'UTF-8');
+                    // @todo v1.1 implement default ext=>charsets enabled/disabled
+                    switch ($fileExt) {
                         case 'css':
                         case 'js':
-                            $content = 'text/' . $fileExt . ';charset=UTF-8';
+                            $contentType = 'text/' . $fileExt;
                             break;
                             
                         case 'jpg':
@@ -125,20 +166,39 @@ if (!function_exists('htmlcache_filename')) {
                         case 'bmp':
                         case 'gif':
                         case 'png':
-                            $content = 'image/' . $fileExt;
+                            $contentType = 'image/' . $fileExt;
                             break;
                     }
-                    header('Content-type:' . $content);
+                    // @todo v1.1 implement config.disableHeaders
+                    //if (!craft()->config->get('disableHeaders', false)) {
+                    if (
+                        isset($settings['disableHeaders']) && $settings['disableHeaders'] === true
+                        || !isset($settings['disableHeaders'])
+                    ) {
+                        // @todo v1.1 implement config.disableCharset
+                        if (
+                            //!craft()->config->get('disableMimeCharset', false)
+                            /*&&*/ strstr($contentType, 'text/') !== false 
+                        ) {
+                            $contentType .= ';' . $contentCharset;
+                        }
+                        header('Content-type:' . $contentType);
+                    }
                 }
                 // Output the content
                 echo $content;
 
-                // Since it's most likely HTML, display small footprint
-                $ms = 0.00000000;
-                if (!empty($_SERVER['REQUEST_TIME_FLOAT'])) {
-                    $ms = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 8);
+                // @todo v1.1 implement test
+                //if (craft()->config->get('enableFootprint', false)) {
+                if (isset($settings['enableFootprint']) && $settings['enableFootprint'] === true) {
+                    $ms = 0.00000000;
+                    if (!empty($_SERVER['REQUEST_TIME_FLOAT'])) {
+                        $ms = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 8);
+                    }
+                    echo PHP_EOL . '<!-- Cached ' . ($direct ? 'direct ' : 'later ') . date('Y-m-d H:i:s', $fmt) . ', displayed ' . date('Y-m-d H:i:s') . ', generated in ' . $ms . 's -->';
                 }
-                //echo PHP_EOL . '<!-- Cached ' . ($direct ? 'direct ' : 'later ') . date('Y-m-d H:i:s', $fmt) . ', displayed ' . date('Y-m-d H:i:s') . ', generated in ' . $ms . 's -->';
+                
+                // end patch 30
             }
 
             // Exit the response if called directly
