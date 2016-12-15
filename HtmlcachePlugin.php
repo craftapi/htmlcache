@@ -9,7 +9,7 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
- * @version   1.0.4
+ * @version   1.0.5.1
  */
 
 namespace Craft;
@@ -93,7 +93,7 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.4.1';
+        return '1.0.5.1';
     }
 
     /**
