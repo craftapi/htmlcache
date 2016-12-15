@@ -69,7 +69,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     
     public function createCacheFile()
     {
-        if ($this->canCreateCacheFile()) {
+        if ($this->canCreateCacheFile() && http_response_code() == 200) {
             $content = ob_get_contents();
             ob_end_flush();
             $file = $this->getCacheFileName();
