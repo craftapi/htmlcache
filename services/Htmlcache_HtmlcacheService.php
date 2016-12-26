@@ -23,9 +23,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         }
 
         $file = $this->getCacheFileName();
-        if (file_exists($file)) {
-            \htmlcache_checkCache(false);
-
+        if (file_exists($file) && \htmlcache_checkCache(false)) {
             return craft()->end();
         }
         // Turn output buffering on
@@ -64,6 +62,13 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
             return false;
         }
 
+        // Skip if the retour plugin is handling this request
+
+        if (in_array(http_response_code(), [301, 302])) {
+            exit('not going to cache!');
+            return false;
+        }
+
         return true;
     }
     
@@ -71,6 +76,9 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
     {
         if ($this->canCreateCacheFile() && http_response_code() == 200) {
             $content = ob_get_contents();
+            if (empty($content)) {
+                return false;
+            }
             ob_end_flush();
             $file = $this->getCacheFileName();
             $fp = fopen($file, 'w+');
@@ -84,10 +92,13 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         }
     }
     
-    public function clearCacheFiles()
+    public function clearCacheFiles(Event $event)
     {
         // @todo split between all/single cache file
-        foreach (glob($this->getCacheFileDirectory() . '*.html') as $file) {
+        foreach (glob($this->getCacheFileDirectory() . '*') as $file) {
+            if (basename($file) == 'settings.json') {
+                continue;
+            }
             unlink($file);
         }
         return true;

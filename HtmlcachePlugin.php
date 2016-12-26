@@ -9,7 +9,7 @@
  * @link      https://github.com/craftapi
  * @package   HTMLCache
  * @since     1.0.0
- * @version   1.0.5.1
+ * @version   1.0.6
  */
 
 namespace Craft;
@@ -27,7 +27,7 @@ class HtmlcachePlugin extends BasePlugin
             include_once 'functions/htmlcache.php';
         }
 
-        if (!$this->isEnabled) {
+        if (!$this->isEnabled || !craft()->plugins->getPlugin('htmlcache')->getSettings()['enableGeneral']) {
             \htmlcache_indexEnabled(false);
         }
 
@@ -37,7 +37,7 @@ class HtmlcachePlugin extends BasePlugin
                 craft()->htmlcache_htmlcache->createCacheFile();
             });
             craft()->on('entries.saveEntry', function (Event $event) {
-                craft()->htmlcache_htmlcache->clearCacheFiles();
+                craft()->htmlcache_htmlcache->clearCacheFiles($event);
             });
         }
     }
@@ -71,7 +71,7 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function getDocumentationUrl()
     {
-        return 'https://github.com/craftapi/htmlcache/blob/master/README.md';
+        return 'https://craftapi.github.io/htmlcache/';
     }
 
     /**
@@ -93,7 +93,7 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.5.1';
+        return '1.0.6';
     }
 
     /**
@@ -161,7 +161,7 @@ class HtmlcachePlugin extends BasePlugin
     /**
      * Returns the plugin settings
      *
-     * @return html
+     * @return string
      */
     public function getSettingsHtml()
     {
@@ -171,7 +171,7 @@ class HtmlcachePlugin extends BasePlugin
     /**
      * Process the settings and check if the index needs to be altered
      *
-     * @return function
+     * @return bool|null
      */
     public function setSettings($values)
     {
@@ -181,6 +181,12 @@ class HtmlcachePlugin extends BasePlugin
 
         if (!empty($values['htmlcacheSettingsForm'])) {
             // Write these settings to a .json file for offline reference
+            $values['enableCsrfProtection'] = craft()->config->get('enableCsrfProtection');
+            $values['csrfTokenName'] = craft()->config->get('csrfTokenName');
+            $values['csrfCookieDomain'] = craft()->config->get('defaultCookieDomain');
+            $values['csrfValidationKey'] = \Yii::app()->getGlobalState(\CSecurityManager::STATE_VALIDATION_KEY);
+            $values['csrfStateCookie'] = craft()->userSession->getStateCookie('');
+            $values['csrfSecureCookies'] = craft()->config->get('useSecureCookies');
             $path = craft()->path->getStoragePath() . 'runtime' . DIRECTORY_SEPARATOR . 'htmlcache' . DIRECTORY_SEPARATOR;
             IOHelper::ensureFolderExists($path);
             $fp = fopen($path . 'settings.json', 'w+');
@@ -205,7 +211,7 @@ class HtmlcachePlugin extends BasePlugin
     /**
      * Set the default settings
      *
-     * @return function
+     * @return void
      */
     public function onAfterInstall()
     {
@@ -233,8 +239,8 @@ class HtmlcachePlugin extends BasePlugin
      */
     public function registerCachePaths()
     {
-        return array(
+        return [
             craft()->htmlcache_htmlcache->clearCacheFiles() => Craft::t('Htmlcache cached pages')
-        );
+        ];
     }
 }
