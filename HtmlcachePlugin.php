@@ -225,4 +225,16 @@ class HtmlcachePlugin extends BasePlugin
         // Make sure to delete any reference in the public/index.php file
         \htmlcache_indexEnabled(false);
     }
+
+    /**
+     * Adds HTML_cache paths to the list of things the Clear Caches tool can delete.
+     *
+     * @return array
+     */
+    public function registerCachePaths()
+    {
+        return array(
+            craft()->htmlcache_htmlcache->clearCacheFiles() => Craft::t('Htmlcache cached pages')
+        );
+    }
 }
