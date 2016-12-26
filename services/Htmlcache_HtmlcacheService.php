@@ -62,13 +62,6 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
             return false;
         }
 
-        // Skip if the retour plugin is handling this request
-
-        if (in_array(http_response_code(), [301, 302])) {
-            exit('not going to cache!');
-            return false;
-        }
-
         return true;
     }
     
