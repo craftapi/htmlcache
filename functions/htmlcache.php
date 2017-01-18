@@ -84,9 +84,8 @@ if (!function_exists('htmlcache_filename')) {
                 unlink($file);
                 return false;
             }
-            $content = file_get_contents($file);
+            $content = trim(file_get_contents($file));
             if (empty($content)) {
-                exit(var_dump(headers_list()));
                 return false;
             }
 
@@ -112,6 +111,8 @@ if (!function_exists('htmlcache_filename')) {
                 if ($settings['enableCsrfProtection'] === true) {
                     // Check if CSRF-tokens are found in the body
                     if (stristr($content, $settings['csrfTokenName']) !== false) {
+                        // do not cache this page for now, until csrf is stable
+                        /*
                         $token = false;//@$_COOKIE[$settings['csrfTokenName']];
                         $sm = new SecurityManager();
                         $sm->setValidationKey($settings['csrfValidationKey']);
@@ -157,6 +158,8 @@ if (!function_exists('htmlcache_filename')) {
                             'name="' . $settings['csrfTokenName'] . '" value="' . htmlentities($nonce) . '"',
                             $content
                         );
+                        */
+                        return false;
                     }
                 }
 
